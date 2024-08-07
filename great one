@@ -1,0 +1,78 @@
+# Task 1: Clone the project repository
+# Command to run in terminal
+!git clone <repository_url>
+
+# Task 2: Create an emotion detection application using Watson NLP library
+# Install Watson NLP library
+!pip install ibm-watson
+
+# Write the application function
+from ibm_watson import NaturalLanguageUnderstandingV1
+from ibm_watson.natural_language_understanding_v1 import Features, EmotionOptions
+
+def emotion_predictor(text):
+    nlu = NaturalLanguageUnderstandingV1(
+        version='2021-08-01',
+        iam_apikey='<your_api_key>',
+        url='<your_service_url>'
+    )
+    response = nlu.analyze(
+        text=text,
+        features=Features(emotion=EmotionOptions())
+    ).get_result()
+    return response['emotion']['document']['emotion']
+
+# Task 3: Format the output of the application
+def formatted_emotion_predictor(text):
+    emotions = emotion_predictor(text)
+    return {
+        'text': text,
+        'emotions': emotions
+    }
+
+# Task 4: Package the application
+# Create the folder structure and __init__.py file
+# Directory structure:
+# my_emotion_app/
+# ├── __init__.py
+# ├── emotion_detector.py
+# └── tests/
+#     └── test_emotion_detector.py
+
+# Task 5: Run Unit tests on your application
+import unittest
+from my_emotion_app.emotion_detector import formatted_emotion_predictor
+
+class TestEmotionDetector(unittest.TestCase):
+    def test_emotion_detection(self):
+        result = formatted_emotion_predictor("I am happy")
+        self.assertIn('emotions', result)
+        self.assertIn('text', result)
+
+if __name__ == '__main__':
+    unittest.main()
+
+# Task 6: Web deployment of the application using Flask
+from flask import Flask, request, jsonify
+from my_emotion_app.emotion_detector import formatted_emotion_predictor
+
+app = Flask(__name__)
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    data = request.get_json()
+    text = data.get('text', '')
+    if not text:
+        return jsonify({'error': 'No text provided'}), 400
+    result = formatted_emotion_predictor(text)
+    return jsonify(result)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+# Task 7: Incorporate Error handling
+# Update emotion_detector function and server.py for error handling
+
+# Task 8: Run static code analysis
+# Use pylint for static code analysis
+!pylint my_emotion_app/
